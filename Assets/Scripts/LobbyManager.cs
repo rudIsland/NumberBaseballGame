@@ -4,6 +4,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System.Collections;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
@@ -71,6 +72,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
     }
 
+   
+
     public void OnCreateRoomButtonClicked()
     {
         string roomName = roomNameInput.text;
@@ -96,12 +99,22 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             else
             {
                 Debug.LogWarning("클라이언트가 방에 입장할 준비가 되지 않았습니다.");
+                StartCoroutine(RetryJoinRoom(selectedRoomName));
             }
         }
         else
         {
             Debug.LogWarning("입장할 방이 선택되지 않았습니다.");
         }
+    }
+
+    private IEnumerator RetryJoinRoom(string roomName)
+    {
+        while (!PhotonNetwork.IsConnectedAndReady)
+        {
+            yield return new WaitForSeconds(1);
+        }
+        PhotonNetwork.JoinRoom(roomName);
     }
 
     public override void OnCreatedRoom()
@@ -115,6 +128,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         Debug.Log("방에 입장하였습니다: " + PhotonNetwork.CurrentRoom.Name);
         SceneManager.LoadScene("GameRoom");
     }
+
 
     public void CreateRoom() // 방 생성하기 판넬 열기
     {
