@@ -1559,6 +1559,7 @@ MonoBehaviour:
   CreateRoomBtn: {fileID: 1209465873}
   ConnectGameRoomBtn: {fileID: 1536635599}
   CreateRoomPannel: {fileID: 522290720}
+  uiManager: {fileID: 6289534605992651628, guid: 0e8a0e327a855c548948e85b8e726e21, type: 3}
 --- !u!4 &1330396081
 Transform:
   m_ObjectHideFlags: 0
