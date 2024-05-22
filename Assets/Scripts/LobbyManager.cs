@@ -18,6 +18,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public GameObject CreateRoomPannel; // 방 생성 판넬
 
+
+    public GameObject EnterRoomPannel; // 입장하기 판넬
+
+
+
     void Start()
     {
         // Photon 서버에 이미 연결된 경우 다시 연결하지 않음
@@ -27,10 +32,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
 
         CreateRoomPannel.SetActive(false);
+        EnterRoomPannel.SetActive(false);   // 입장하기 패널 끄기
 
         // 버튼 클릭 이벤트 설정
         CreateRoomBtn.onClick.AddListener(OnCreateRoomButtonClicked);
         ConnectGameRoomBtn.onClick.AddListener(OnJoinRoomButtonClicked);
+
     }
 
     public override void OnConnectedToMaster()
@@ -145,4 +152,21 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             CreateRoomPannel.SetActive(false);
         }
     }
+
+    public void CloseEnterRoomPannel() // 입장하기 패널 닫기
+    {
+        if (EnterRoomPannel.activeSelf)
+        {
+            EnterRoomPannel.SetActive(false);
+        }
+    }
+
+    public void OpenEnterRoomPannel() // 입장하기 패널 열기
+    {
+        if (!EnterRoomPannel.activeSelf)
+        {
+            EnterRoomPannel.SetActive(true);
+        }
+    }
+
 }
