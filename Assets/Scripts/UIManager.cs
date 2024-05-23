@@ -23,6 +23,12 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        EnableInputField(false); // 게임 시작 전에는 입력 필드를 비활성화합니다.
+    }
+
+
     public void OnSubmitGuess()
     {
         string guess = guessInput.text; // 입력된 추측 가져오기
@@ -36,5 +42,15 @@ public class UIManager : MonoBehaviour
     public void DisplayResult(string message)
     {
         resultText.text += "\n" + message; // 결과를 텍스트 UI에 추가하여 표시
+    }
+
+
+    public void EnableInputField(bool enable)
+    {
+        guessInput.interactable = enable; // 입력 필드 활성화 또는 비활성화
+        if (!enable)
+        {
+            guessInput.text = ""; // 비활성화 시 입력 필드를 비웁니다.
+        }
     }
 }

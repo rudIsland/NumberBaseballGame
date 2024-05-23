@@ -3,12 +3,18 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
+using System.Collections;
+using Photon.Pun.Demo.PunBasics;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
     public Text GameLog;
     public List<Photon.Realtime.Player> RoomPlayerList = new List<Photon.Realtime.Player>();
+    public List<Photon.Realtime.Player> ReadyPlayers = new List<Photon.Realtime.Player>(); // 준비 상태인 플레이어 리스트
     public TeamManager teamManager;
+    public GameManager gameManager;
+
+
 
     void Start()
     {
@@ -41,13 +47,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         RoomPlayerList.Add(player);
         teamManager.AssignTeam(player);
+        gameManager.UpdateReadyButtonText();
     }
     
     //리스트에서 플레이어 제거
     public void removePlayerFromList(Photon.Realtime.Player player)
     {
         RoomPlayerList.Remove(player);
+        ReadyPlayers.Remove(player);
         teamManager.RemovePlayerFromTeam(player);
+        gameManager.PlayerNotReady();
     }
 
     [PunRPC]
@@ -81,5 +90,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 addNewPlayerToList(player);
             }
         }
+        gameManager.UpdateReadyButtonText();
     }
+
 }
