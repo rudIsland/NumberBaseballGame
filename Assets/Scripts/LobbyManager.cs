@@ -16,12 +16,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public Button CreateRoomBtn; // 방 생성하기 버튼
     public Button ConnectGameRoomBtn; // 방 입장하기 버튼
 
-    public GameObject CreateRoomPannel; // 방 생성 판넬
+    public GameObject CreateRoomPanel; // 방 생성 판넬
+    public GameObject EnterRoomPanel; // 입장하기 판넬
 
-
-    public GameObject EnterRoomPannel; // 입장하기 판넬
-
-
+    private Dictionary<string, RoomInfo> cachedRoomList; // 방 목록 캐시
 
     void Start()
     {
@@ -31,13 +29,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             PhotonNetwork.ConnectUsingSettings();
         }
 
-        CreateRoomPannel.SetActive(false);
-        EnterRoomPannel.SetActive(false);   // 입장하기 패널 끄기
+        CreateRoomPanel.SetActive(false);
+        EnterRoomPanel.SetActive(false); // 입장하기 패널 끄기
 
         // 버튼 클릭 이벤트 설정
         CreateRoomBtn.onClick.AddListener(OnCreateRoomButtonClicked);
         ConnectGameRoomBtn.onClick.AddListener(OnJoinRoomButtonClicked);
 
+        cachedRoomList = new Dictionary<string, RoomInfo>();
     }
 
     public override void OnConnectedToMaster()
@@ -56,11 +55,22 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        // 방 목록이 업데이트되면 UI도 업데이트
-        UpdateRoomList(roomList);
+        // 방 목록이 업데이트되면 캐시와 UI도 업데이트
+        foreach (RoomInfo roomInfo in roomList)
+        {
+            if (roomInfo.RemovedFromList)
+            {
+                cachedRoomList.Remove(roomInfo.Name);
+            }
+            else
+            {
+                cachedRoomList[roomInfo.Name] = roomInfo;
+            }
+        }
+        UpdateRoomList();
     }
 
-    void UpdateRoomList(List<RoomInfo> roomList = null)
+    void UpdateRoomList()
     {
         // 기존 방 목록 제거
         foreach (Transform child in roomListContent)
@@ -68,18 +78,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             Destroy(child.gameObject);
         }
 
-        if (roomList != null)
+        foreach (RoomInfo roomInfo in cachedRoomList.Values)
         {
-            foreach (RoomInfo roomInfo in roomList)
-            {
-                GameObject roomButtonObj = Instantiate(roomButtonPrefab, roomListContent);
-                RoomButton roomButton = roomButtonObj.GetComponent<RoomButton>();
-                roomButton.Setup(roomInfo, this);
-            }
+            GameObject roomButtonObj = Instantiate(roomButtonPrefab, roomListContent);
+            RoomButton roomButton = roomButtonObj.GetComponent<RoomButton>();
+            roomButton.Setup(roomInfo, this);
         }
     }
-
-   
 
     public void OnCreateRoomButtonClicked()
     {
@@ -136,37 +141,35 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         SceneManager.LoadScene("GameRoom");
     }
 
-
     public void CreateRoom() // 방 생성하기 판넬 열기
     {
-        if (!CreateRoomPannel.activeSelf)
+        if (!CreateRoomPanel.activeSelf)
         {
-            CreateRoomPannel.SetActive(true);
+            CreateRoomPanel.SetActive(true);
         }
     }
 
     public void CloseCreateRoomPanel()
     {
-        if (CreateRoomPannel.activeSelf)
+        if (CreateRoomPanel.activeSelf)
         {
-            CreateRoomPannel.SetActive(false);
+            CreateRoomPanel.SetActive(false);
         }
     }
 
-    public void CloseEnterRoomPannel() // 입장하기 패널 닫기
+    public void CloseEnterRoomPanel() // 입장하기 패널 닫기
     {
-        if (EnterRoomPannel.activeSelf)
+        if (EnterRoomPanel.activeSelf)
         {
-            EnterRoomPannel.SetActive(false);
+            EnterRoomPanel.SetActive(false);
         }
     }
 
-    public void OpenEnterRoomPannel() // 입장하기 패널 열기
+    public void OpenEnterRoomPanel() // 입장하기 패널 열기
     {
-        if (!EnterRoomPannel.activeSelf)
+        if (!EnterRoomPanel.activeSelf)
         {
-            EnterRoomPannel.SetActive(true);
+            EnterRoomPanel.SetActive(true);
         }
     }
-
 }

@@ -82,31 +82,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         UIManager.Instance.DisplayResult($"{guess}: {result}");
     }
 
-    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
-    {
-        Debug.Log(newPlayer.NickName + " entered the room.");
-        GameLog.text += newPlayer.NickName + " entered the room.\n";
-
-        if (playerManager != null)
-        {
-            Debug.Log(newPlayer.NickName + " entered the room.");
-            // 플레이어 매니저를 통해 새로운 플레이어 정보 전달
-            playerManager.AddNewPlayer(newPlayer);
-        }
-    }
-
-    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
-    {
-        Debug.Log(otherPlayer.NickName + " left the room.");
-        GameLog.text += otherPlayer.NickName + " left the room.";
-
-        if (playerManager != null)
-        {
-            // 플레이어 매니저를 통해 플레이어 제거 정보 전달
-            playerManager.RemovePlayer(otherPlayer);
-        }
-    }
-
     [PunRPC]
     public void SubmitGuess(string guess, int playerId)
     {

@@ -1,70 +1,70 @@
 using Photon.Pun;
+using Photon.Pun.Demo.PunBasics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TeamManager : MonoBehaviourPunCallbacks
 {
-    public Team team1;
-    public Team team2;
-    public GameObject playerPrefab; // PlayerUI 프리팹
+    public Text GameLog; //게임 로그
+    public List<Photon.Realtime.Player> Team1 = new List<Photon.Realtime.Player>();
+    public List<Photon.Realtime.Player> Team2 = new List<Photon.Realtime.Player>();
+
+    // 팀 패널 UI
     public Transform team1Panel;
     public Transform team2Panel;
 
-    public void AddPlayerToTeam(Player player)
+    // PlayerUI 프리팹
+    public GameObject playerUIPrefab;
+    private Dictionary<Photon.Realtime.Player, GameObject> playerUIs = new Dictionary<Photon.Realtime.Player, GameObject>();
+
+    public void AssignTeam(Photon.Realtime.Player player)
     {
-        if (player != null)
+        if (Team1.Count <= Team2.Count)
         {
-            if (team1.GetPlayers().Count <= team2.GetPlayers().Count)
-            {
-                team1.AddPlayer(player);
-                UpdateTeamUI(team1Panel, team1.GetPlayers());
-            }
-            else
-            {
-                team2.AddPlayer(player);
-                UpdateTeamUI(team2Panel, team2.GetPlayers());
-            }
+            Team1.Add(player);
+            Debug.Log(player.NickName + " assigned to Team 1");
+            GameLog.text += player.NickName + " assigned to Team 1\n";
+            AddPlayerToUI(player, team1Panel);
         }
         else
         {
-            Debug.Log("추가될 플레이어가 널임");
+            Team2.Add(player);
+            Debug.Log(player.NickName + " assigned to Team 2");
+            GameLog.text += player.NickName + " assigned to Team 2\n";
+            AddPlayerToUI(player, team2Panel);
         }
     }
 
-    public void RemovePlayerFromTeam(int uniqueID)
+    private void AddPlayerToUI(Photon.Realtime.Player player, Transform teamPanel)
     {
-        if (team1.HasPlayer(uniqueID))
+        GameObject playerUI = Instantiate(playerUIPrefab, teamPanel);
+        Text playerNameText = playerUI.GetComponentInChildren<Text>();
+        if (playerNameText != null)
         {
-            team1.RemovePlayer(uniqueID);
-            UpdateTeamUI(team1Panel, team1.GetPlayers());
+            playerNameText.text = player.NickName;
         }
-        else if (team2.HasPlayer(uniqueID))
-        {
-            team2.RemovePlayer(uniqueID);
-            UpdateTeamUI(team2Panel, team2.GetPlayers());
-        }
+        playerUIs[player] = playerUI;
     }
 
-    public void UpdateTeamUI(Transform teamPanel, List<Player> players)
+
+    //팀에서 플레이어 제거
+    public void RemovePlayerFromTeam(Photon.Realtime.Player player)
     {
-        // 기존 UI 요소 제거
-        foreach (Transform child in teamPanel)
+        if (Team1.Contains(player))
         {
-            Destroy(child.gameObject);
+            Team1.Remove(player);
+        }
+        else if (Team2.Contains(player))
+        {
+            Team2.Remove(player);
         }
 
-        // 리스트의 각 플레이어에 대해 UI 요소 생성
-        foreach (Player player in players)
+        if (playerUIs.ContainsKey(player))
         {
-            GameObject playerUIObject = Instantiate(playerPrefab, teamPanel);
-            PlayerUI playerUI = playerUIObject.GetComponent<PlayerUI>();
-            playerUI.SetPlayerName(player.getName());
+            Destroy(playerUIs[player]);
+            playerUIs.Remove(player);
         }
-    }
-
-    internal void AddPlayerToTeam(Photon.Realtime.Player newPlayer)
-    {
-        throw new NotImplementedException();
     }
 }

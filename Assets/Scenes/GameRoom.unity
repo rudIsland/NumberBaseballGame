@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 95492917}
   - component: {fileID: 95492918}
+  - component: {fileID: 95492919}
   m_Layer: 0
   m_Name: PlayerManager
   m_TagString: Untagged
@@ -163,7 +164,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1ee121fd1e5ce246bf3ef1242ee14a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameLog: {fileID: 1513710969}
   teamManager: {fileID: 2026270159}
+--- !u!114 &95492919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 95492916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 3
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &179201159
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,7 +864,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1293769386}
   - component: {fileID: 1293769389}
-  - component: {fileID: 1293769390}
   - component: {fileID: 1293769388}
   - component: {fileID: 1293769387}
   m_Layer: 5
@@ -933,19 +956,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1293769385}
   m_CullTransparentMesh: 1
---- !u!114 &1293769390
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1293769385}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1e6a867e4b05a04eb8be70db9eea208, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerList: []
 --- !u!1 &1488492936
 GameObject:
   m_ObjectHideFlags: 0
@@ -1163,12 +1173,12 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 20
+    m_FontSize: 18
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 2
+    m_MinSize: 1
     m_MaxSize: 40
-    m_Alignment: 4
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -1267,7 +1277,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1559043113}
-  - component: {fileID: 1559043117}
   - component: {fileID: 1559043115}
   - component: {fileID: 1559043114}
   - component: {fileID: 1559043116}
@@ -1361,19 +1370,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &1559043117
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1559043112}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1e6a867e4b05a04eb8be70db9eea208, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerList: []
 --- !u!1 &1673168597
 GameObject:
   m_ObjectHideFlags: 0
@@ -1532,11 +1528,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dc89cc3354633e42a1d41ac1b6e4725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team1: {fileID: 1559043117}
-  team2: {fileID: 1293769390}
-  playerPrefab: {fileID: 3727638337070888168, guid: 4bb6280fb45aaa14b9511c544216d93b, type: 3}
+  GameLog: {fileID: 1513710969}
   team1Panel: {fileID: 1559043113}
   team2Panel: {fileID: 1293769386}
+  playerUIPrefab: {fileID: 4933476586747698999, guid: 2ad39e0ae36ed884e8bcad56ac81d093, type: 3}
 --- !u!4 &2026270160
 Transform:
   m_ObjectHideFlags: 0

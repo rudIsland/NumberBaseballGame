@@ -10,9 +10,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public InputField Name; // 클라이언트 이름
     public Button connectButton; // 접속하기 버튼
     private bool isConnected = false;
-    public Player player;
-    private static HashSet<int> usedIDs = new HashSet<int>(); // 사용된 ID를 추적하기 위한 HashSet
-
     void Awake()
     {
         DontDestroyOnLoad(this.gameObject); // 오브젝트가 파괴되지 않도록 설정
@@ -30,11 +27,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (!isConnected)
         {
             // 클라이언트 이름 설정
-            PhotonNetwork.NickName = Name.text;
+            string playerName = Name.text;
+            if (string.IsNullOrEmpty(playerName))
+            {
+                Debug.LogError("Player name is invalid.");
+                return;
+            }
 
-            // 고유 ID 설정
-            int uniqueID = GenerateUniqueID();
-            Player client = new Player(GenerateUniqueID(), Name.text); //플레이어가 생성됨.
+            PhotonNetwork.NickName = playerName;
 
             // Photon 서버에 접속
             PhotonNetwork.ConnectUsingSettings();
@@ -44,6 +44,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     // 서버 접속이 성공했을 때 호출되는 콜백 함수
     public override void OnConnectedToMaster()
     {
+        Debug.Log("Connected to Photon Server with ID: " + PhotonNetwork.LocalPlayer.UserId);
+
+
         Debug.Log("Connected to Photon Server");
         isConnected = true;
         // 로비에 접속
@@ -65,16 +68,24 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         isConnected = false;
     }
 
-    // 중복되지 않는 고유 ID를 생성하는 함수
-    private int GenerateUniqueID()
+    public override void OnJoinedRoom()
     {
-        int newID;
-        do
-        {
-            newID = Random.Range(1, 101);
-        } while (usedIDs.Contains(newID));
+        
+        Debug.Log("Joined a room successfully.");
 
-        usedIDs.Add(newID);
-        return newID;
+        // 여기에서 플레이어 객체를 생성할 수 있습니다.
+        // PhotonNetwork.Instantiate를 사용하여 모든 클라이언트에서 동기화된 객체 생성
+        Vector3 spawnPosition = new Vector3(Random.Range(-5f, 5f), 0, Random.Range(-5f, 5f));
+        GameObject playerObject = PhotonNetwork.Instantiate("PlayerPrefab", spawnPosition, Quaternion.identity);
+
+        if (playerObject != null)
+        {
+            Debug.Log("PlayerPrefab instantiated successfully.");
+        }
+        else
+        {
+            Debug.LogError("PlayerPrefab instantiation failed.");
+        }
     }
+
 }

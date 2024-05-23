@@ -1611,8 +1611,8 @@ MonoBehaviour:
   roomListContent: {fileID: 1390014800}
   CreateRoomBtn: {fileID: 1209465873}
   ConnectGameRoomBtn: {fileID: 1536635599}
-  CreateRoomPannel: {fileID: 1589334633}
-  EnterRoomPannel: {fileID: 882312790}
+  CreateRoomPanel: {fileID: 1589334633}
+  EnterRoomPanel: {fileID: 882312790}
 --- !u!4 &1330396081
 Transform:
   m_ObjectHideFlags: 0
@@ -1713,7 +1713,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1330396080}
         m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
-        m_MethodName: OpenEnterRoomPannel
+        m_MethodName: OpenEnterRoomPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2232,7 +2232,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1330396080}
         m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
-        m_MethodName: CloseEnterRoomPannel
+        m_MethodName: CloseEnterRoomPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -1,17 +1,29 @@
 using Photon.Pun;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+
+public class Player : MonoBehaviourPun
 {
     public string playerName;
-    public int teamNumber;
-    public int uniqueID; // 고유 ID 추가
+    public string playerId; // 고유 ID 추가
 
-    public Player(int unique, string name)
+
+    void Start()
     {
-        uniqueID = unique;
+        if (photonView.IsMine)
+        {
+            playerName = PhotonNetwork.LocalPlayer.NickName;
+            playerId = PhotonNetwork.LocalPlayer.UserId;
+
+            // 로그로 플레이어 정보 출력
+            Debug.Log("Player Name: " + playerName);
+            Debug.Log("Player ID: " + playerId);
+        }
+    }
+
+    public Player(string unique, string name)
+    {
+        playerId = unique;
         playerName = name;
     }
 
@@ -25,23 +37,14 @@ public class Player : MonoBehaviour
         return playerName;
     }
 
-    public void setTeamNumber(int num)
+
+    public void setplayerId(string id)
     {
-        teamNumber = num;
+        playerId = id;
     }
 
-    public int getTeamNumber()
+    public string getplayerId()
     {
-        return teamNumber;
-    }
-
-    public void setUniqueID(int id)
-    {
-        uniqueID = id;
-    }
-
-    public int getUniqueID()
-    {
-        return uniqueID;
+        return playerId;
     }
 }

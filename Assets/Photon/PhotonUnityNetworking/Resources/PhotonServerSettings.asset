@@ -46,6 +46,8 @@ MonoBehaviour:
   - AddPlayerToTeam
   - RemovePlayerFromTeam
   - SyncTeams
+  - BroadcastLog
+  - SyncPlayerList
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
