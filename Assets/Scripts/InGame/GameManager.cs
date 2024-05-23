@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public PlayerManager playerManager; // playerManager를 연결
     public TeamManager teamManager; //TeamManager를 연결
+    public ChatManager chatManager; //ChatManager를 연결
 
     private bool isGameStarting = false;
     private int readyPlayersCount = 0;

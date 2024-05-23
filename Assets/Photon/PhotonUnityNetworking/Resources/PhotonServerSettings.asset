@@ -52,6 +52,8 @@ MonoBehaviour:
   - TogglePlayerReadyState
   - StartGameCountdownRPC
   - ShowUnbalancedTeamsMessageRPC
+  - ReceiveChatMessage
+  - SendChatMessage
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
