@@ -68,7 +68,7 @@ public class TeamManager : MonoBehaviourPunCallbacks
 
     // ÆÀ º¯°æ
     [PunRPC]
-    public void SwitchPlayerTeamRPC(int playerId, int toTeamIndex)
+        public void SwitchPlayerTeamRPC(int playerId, int toTeamIndex)
     {
         Photon.Realtime.Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerId);
         if (player == null)

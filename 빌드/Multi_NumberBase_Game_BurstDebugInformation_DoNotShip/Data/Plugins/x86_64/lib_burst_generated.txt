@@ -59,6 +59,7 @@ Library: C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Temp\BurstOutput\Dat
 --linker-options=PdbAltPath="Multi_NumberBase_Game_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Temp\Burst
+--debug=Full
 --key-folder=C:/Program Files/Unity/Hub/Editor/2023.2.20f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Library\Burst
 --output=C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
@@ -160,6 +161,7 @@ Library: C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Temp\BurstOutput\Dat
 --linker-options=PdbAltPath="Multi_NumberBase_Game_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Temp\Burst
+--debug=Full
 --key-folder=C:/Program Files/Unity/Hub/Editor/2023.2.20f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Library\Burst
 --output=C:\Users\JiHak\Documents\GitHub\NumberBaseballGame\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated

@@ -55,6 +55,10 @@ MonoBehaviour:
   - ReceiveChatMessage
   - SendChatMessage
   - SwitchPlayerTeamRPC
+  - ResetTimer
+  - StartTimer
+  - SetSubmitButtonInteractable
+  - OnSubmitGuess
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
