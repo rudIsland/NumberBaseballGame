@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
-using Photon.Pun.Demo.PunBasics;
 using System.Collections;
 
 public class GameManager : MonoBehaviourPunCallbacks
@@ -17,14 +16,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     public ChatManager chatManager; //ChatManager를 연결
 
     private bool isGameStarting = false;
-    private int readyPlayersCount = 0;
     public Text countdownText; //카운트다운 텍스트
-    public Button readyButton;
+    public Button readyButton; //게임 시작준비 버튼
 
     void Start()
     {
-        UIManager.Instance.EnableInputField(false); // 게임 시작 전에는 입력 필드를 비활성화합니다.
-        UpdateReadyButtonText();
+        UIManager.Instance.EnableInputField(false); // 게임 시작 전에는 입력 필드를 비활성화
+        UpdateStartGameButtonVisibility(); //방장만 버튼이 보이도록 설정
     }
 
     void GenerateSecretNumber()
@@ -100,18 +98,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            readyPlayersCount++;
-            UpdateReadyButtonText();
             CheckAllPlayersReady();
-        }
-    }
-
-    public void PlayerNotReady()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            readyPlayersCount = Mathf.Max(0, readyPlayersCount - 1);
-            UpdateReadyButtonText();
         }
     }
 
@@ -137,6 +124,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private IEnumerator StartGameCountdown()
     {
         isGameStarting = true;
+        UpdateStartGameButtonVisibility();
         for (int i = 3; i > 0; i--)
         {
             countdownText.text = i.ToString();
@@ -146,7 +134,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(1);
         countdownText.text = "";
         photonView.RPC("GameStart", RpcTarget.All);
-        isGameStarting = false;
     }
 
     [PunRPC]
@@ -162,6 +149,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         countdownText.text = "";
     }
 
+
+
     [PunRPC]
     public void GameStart()
     {
@@ -171,40 +160,17 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         UIManager.Instance.EnableInputField(true); // 게임 시작 시 입력 필드를 활성화합니다.
     }
-
-    public void OnReadyButtonClicked() //아마 안쓸듯
+    // 방장만 버튼이 보이도록 설정
+    public void UpdateStartGameButtonVisibility()
     {
-        photonView.RPC("TogglePlayerReadyState", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer);
+        readyButton.gameObject.SetActive(PhotonNetwork.IsMasterClient && !isGameStarting);
     }
 
-    [PunRPC]
-    public void TogglePlayerReadyState(Photon.Realtime.Player player)
+    public void GameEnd()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            if (playerManager.ReadyPlayers.Contains(player))
-            {
-                playerManager.ReadyPlayers.Remove(player);
-                PlayerNotReady();
-            }
-            else
-            {
-                playerManager.ReadyPlayers.Add(player);
-                PlayerReady();
-            }
-        }
-    }
-
-    public void UpdateReadyButtonText()
-    {
-        if (playerManager.ReadyPlayers.Contains(PhotonNetwork.LocalPlayer))
-        {
-            readyButton.GetComponentInChildren<Text>().text = $"{readyPlayersCount}/{playerManager.RoomPlayerList.Count}";
-        }
-        else
-        {
-            readyButton.GetComponentInChildren<Text>().text = "Ready";
-        }
+        isGameStarting = false;
+        UIManager.Instance.EnableInputField(false); // 게임 종료 시 입력 필드를 비활성화
+        UpdateStartGameButtonVisibility(); // 게임 종료 시 버튼 다시 보이기
     }
 
 }

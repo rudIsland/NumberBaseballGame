@@ -22,8 +22,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             addNewPlayerToList(PhotonNetwork.LocalPlayer);
-
             photonView.RPC("BroadcastLog", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName + " entered the room.");
+            gameManager.UpdateStartGameButtonVisibility();
         }
     }
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
@@ -40,6 +40,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         Debug.Log(otherPlayer.NickName + " 이 퇴장");
         photonView.RPC("BroadcastLog", RpcTarget.All, otherPlayer.NickName + " left the room.");
         removePlayerFromList(otherPlayer);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            AssignNewMasterClient();
+        }
     }
 
     //리스트에 플레이어 추가
@@ -47,8 +51,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         RoomPlayerList.Add(player);
         teamManager.AssignTeam(player);
-        gameManager.UpdateReadyButtonText();
-    }
+     }
     
     //리스트에서 플레이어 제거
     public void removePlayerFromList(Photon.Realtime.Player player)
@@ -56,7 +59,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         RoomPlayerList.Remove(player);
         ReadyPlayers.Remove(player);
         teamManager.RemovePlayerFromTeam(player);
-        gameManager.PlayerNotReady();
     }
 
     [PunRPC]
@@ -90,7 +92,32 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 addNewPlayerToList(player);
             }
         }
-        gameManager.UpdateReadyButtonText();
+    }
+
+    // 새로운 방장을 설정하는 메서드
+    public void AssignNewMasterClient()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+
+        if (teamManager.Team1.Count > 0)
+        {
+            PhotonNetwork.SetMasterClient(teamManager.Team1[0]);
+        }
+        else if (teamManager.Team2.Count > 0)
+        {
+            PhotonNetwork.SetMasterClient(teamManager.Team2[0]);
+        }
+
+        gameManager.UpdateStartGameButtonVisibility();
+    }
+
+    public override void OnMasterClientSwitched(Photon.Realtime.Player newMasterClient)
+    {
+        base.OnMasterClientSwitched(newMasterClient);
+        gameManager.UpdateStartGameButtonVisibility();
     }
 
 }
