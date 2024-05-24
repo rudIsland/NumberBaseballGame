@@ -1171,6 +1171,7 @@ MonoBehaviour:
   chatMessagePrefab: {fileID: 7445981218671786680, guid: 6d7970a6de8d21240995b1687e4fd1c0, type: 3}
   teamManager: {fileID: 2026270159}
   scrollRect: {fileID: 585076085}
+  scrollSensitivity: 10
 --- !u!114 &985832965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1384,6 +1385,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1293769386}
+  - component: {fileID: 1293769390}
   - component: {fileID: 1293769389}
   - component: {fileID: 1293769388}
   - component: {fileID: 1293769387}
@@ -1426,12 +1428,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
+    m_Left: 5
     m_Right: 0
     m_Top: 3
     m_Bottom: 3
   m_ChildAlignment: 0
-  m_Spacing: 3
+  m_Spacing: 5
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -1477,6 +1479,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1293769385}
   m_CullTransparentMesh: 1
+--- !u!114 &1293769390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293769385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2a555e0dc3f0be44ac4cfcce7ebbb3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  teamManager: {fileID: 2026270159}
+  teamIndex: 2
 --- !u!1 &1367316570
 GameObject:
   m_ObjectHideFlags: 0
@@ -2078,6 +2094,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1559043113}
   - component: {fileID: 1559043115}
+  - component: {fileID: 1559043117}
   - component: {fileID: 1559043114}
   - component: {fileID: 1559043116}
   m_Layer: 5
@@ -2170,6 +2187,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1559043117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1559043112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2a555e0dc3f0be44ac4cfcce7ebbb3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  teamManager: {fileID: 2026270159}
+  teamIndex: 1
 --- !u!1 &1673168597
 GameObject:
   m_ObjectHideFlags: 0

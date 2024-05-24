@@ -3,6 +3,7 @@ using Photon.Pun.Demo.PunBasics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TeamManager : MonoBehaviourPunCallbacks
@@ -40,11 +41,8 @@ public class TeamManager : MonoBehaviourPunCallbacks
     private void AddPlayerToUI(Photon.Realtime.Player player, Transform teamPanel)
     {
         GameObject playerUI = Instantiate(playerUIPrefab, teamPanel);
-        Text playerNameText = playerUI.GetComponentInChildren<Text>();
-        if (playerNameText != null)
-        {
-            playerNameText.text = player.NickName;
-        }
+        playerUI.GetComponentInChildren<Text>().text = player.NickName;
+
         playerUIs[player] = playerUI;
     }
 
@@ -66,5 +64,62 @@ public class TeamManager : MonoBehaviourPunCallbacks
             Destroy(playerUIs[player]);
             playerUIs.Remove(player);
         }
+    }
+
+    // 팀 변경
+    [PunRPC]
+    public void SwitchPlayerTeamRPC(int playerId, int toTeamIndex)
+    {
+        Photon.Realtime.Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerId);
+        if (player == null)
+        {
+            return;
+        }
+
+        List<Photon.Realtime.Player> fromTeam = Team1.Contains(player) ? Team1 : Team2;
+        List<Photon.Realtime.Player> toTeam = toTeamIndex == 1 ? Team1 : Team2;
+        Transform newTeamPanel = toTeamIndex == 1 ? team1Panel : team2Panel;
+
+        if (fromTeam != toTeam)
+        {
+            fromTeam.Remove(player);
+            toTeam.Add(player);
+
+            Debug.Log(player.NickName + " switched to Team " + toTeamIndex);
+            GameLog.text += player.NickName + " switched to Team " + toTeamIndex + "\n";
+
+            UpdatePlayerUI(player, newTeamPanel);
+        }
+    }
+
+    public void SwitchPlayerTeam(Photon.Realtime.Player player, int toTeamIndex)
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+
+        photonView.RPC("SwitchPlayerTeamRPC", RpcTarget.All, player.ActorNumber, toTeamIndex);
+    }
+
+    private void UpdatePlayerUI(Photon.Realtime.Player player, Transform newTeamPanel)
+    {
+        if (playerUIs.ContainsKey(player))
+        {
+            playerUIs[player].transform.SetParent(newTeamPanel, false);
+        }
+    }
+
+    // UI에서 플레이어를 가져오는 메서드
+    public Photon.Realtime.Player GetPlayerByUI(GameObject playerUI)
+    {
+        foreach (var kvp in playerUIs)
+        {
+            if (kvp.Value == playerUI)
+            {
+                return kvp.Key;
+            }
+        }
+        return null;
     }
 }
