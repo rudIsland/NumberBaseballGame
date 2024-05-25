@@ -8,7 +8,7 @@ public class dont : MonoBehaviour
     private static dont instance;
 
     // 파괴될 씬의 이름
-    public string sceneToDestroy = "GameRoom";
+    //public string sceneToDestroy = "GameRoom";
     void Awake()
     {
         if (instance != null)
@@ -36,9 +36,9 @@ public class dont : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 특정 씬으로 전환되었을 때 오브젝트를 파괴
-        if (scene.name == sceneToDestroy)
+       /* if (scene.name == sceneToDestroy)
         {
             Destroy(gameObject);
-        }
+        }*/
     }
 }

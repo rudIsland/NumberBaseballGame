@@ -63,6 +63,13 @@ MonoBehaviour:
   - SetTeam2NumberSet
   - IsInputNumberPanelActiveRPC
   - SetSecretNumber
+  - CheckGuess
+  - IsWin
+  - EnableInputPanels
+  - HideInputPanels
+  - GameEnd
+  - ResetGame
+  - ResetGameRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

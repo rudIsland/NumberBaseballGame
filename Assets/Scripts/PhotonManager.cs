@@ -46,7 +46,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Connected to Photon Server with ID: " + PhotonNetwork.LocalPlayer.UserId);
 
-
         Debug.Log("Connected to Photon Server");
         isConnected = true;
         // 로비에 접속

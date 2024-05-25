@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using System.Collections.Generic;
+using System.Collections;
 
 public class UIManager : MonoBehaviourPunCallbacks
 {
@@ -54,7 +55,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     {
         if (guess.Length != 4)
         {
-            DisplayError("입력은 4자리 숫자여야 합니다."); // 에러 메시지 출력
+            StartCoroutine(DisplayErrorCoroutine("입력은 4자리 숫자여야 합니다.")); // 에러 메시지 출력
             return false;
         }
 
@@ -63,12 +64,12 @@ public class UIManager : MonoBehaviourPunCallbacks
         {
             if (!char.IsDigit(c))
             {
-                DisplayError("입력은 숫자만 포함해야 합니다."); // 에러 메시지 출력
+                StartCoroutine(DisplayErrorCoroutine("입력은 숫자만 포함해야 합니다.")); // 에러 메시지 출력
                 return false;
             }
             if (!uniqueChars.Add(c))
             {
-                DisplayError("입력은 중복된 숫자를 포함할 수 없습니다."); // 에러 메시지 출력
+                StartCoroutine(DisplayErrorCoroutine("입력은 중복된 숫자를 포함할 수 없습니다.")); // 에러 메시지 출력("입력은 중복된 숫자를 포함할 수 없습니다."); // 에러 메시지 출력
                 return false;
             }
         }
@@ -76,12 +77,14 @@ public class UIManager : MonoBehaviourPunCallbacks
         return true;
     }
 
-    private void DisplayError(string message)
+    private IEnumerator DisplayErrorCoroutine(string message)
     {
         // 에러 메시지를 화면에 표시
         if (errorText != null)
         {
             errorText.text = message;
+            yield return new WaitForSeconds(1);
+            errorText.text = "";
         }
         else
         {
@@ -95,10 +98,22 @@ public class UIManager : MonoBehaviourPunCallbacks
         errorText.text = "";
     }
 
+  
     public void EnableInputPanels(bool enable)
     {
         Team1_Input_GuessPanel.SetActive(enable && gameManager.IsTeam1Turn);
         Team2_Input_GuessPanel.SetActive(enable && !gameManager.IsTeam1Turn);
+    }
+
+    [PunRPC]
+    public void HideInputPanels()
+    {
+        Team1_Input_GuessPanel.SetActive(false);
+        Team2_Input_GuessPanel.SetActive(false);
+        Team1_guessInput.text = "";
+        Team2_guessInput.text = "";
+        resultText.text = "";
+        errorText.text = "";
     }
 
     public void EnableInputPanelsForTeam(bool enable, bool isTeam1)
