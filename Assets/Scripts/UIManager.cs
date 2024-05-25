@@ -3,13 +3,19 @@ using UnityEngine.UI;
 using Photon.Pun;
 using System.Collections.Generic;
 
-public class UIManager : MonoBehaviour
+public class UIManager : MonoBehaviourPunCallbacks
 {
     public static UIManager Instance; // 싱글톤 인스턴스
 
-    public InputField guessInput; // 추측 입력 필드
+    public InputField Team1_guessInput; // 추측 입력 필드
+    public InputField Team2_guessInput; // 추측 입력 필드
+    public GameObject Team1_Input_GuessPanel; // 팀 1 입력 판넬
+    public GameObject Team2_Input_GuessPanel; // 팀 2 입력 판넬
+
+
     public Text resultText; // 결과를 표시하는 텍스트
     public GameManager gameManager; // 게임 매니저 참조
+    public TeamManager teamManager;
     public Text errorText; // ErrorText UI 요소
 
     void Awake()
@@ -27,23 +33,24 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        EnableInputField(false); // 게임 시작 전에는 입력 필드를 비활성화합니다.
+        EnableInputPanels(false); // 게임 시작 전에는 입력 필드를 비활성화합니다.
     }
 
-
+    [PunRPC]
     public void OnSubmitGuess()
     {
-        string guess = guessInput.text; // 입력된 추측 가져오기
+        string guess = gameManager.IsTeam1Turn ? Team1_guessInput.text : Team2_guessInput.text; // 입력된 추측 가져오기
         if (IsValidGuess(guess)) // 간단한 입력 검증 및 중복 숫자 검사
         {
+            //우리팀한테만 보내게 수정해야함.
             PhotonView photonView = gameManager.GetComponent<PhotonView>();
-            photonView.RPC("SubmitGuess", RpcTarget.MasterClient, guess); // 마스터 클라이언트에게 추측 전송
-            photonView.RPC("OnSubmitGuess", RpcTarget.All);
-            photonView.RPC("SetSubmitButtonInteractable", RpcTarget.All, false);
+            photonView.RPC("SubmitGuess", RpcTarget.MasterClient, guess, PhotonNetwork.LocalPlayer.ActorNumber); // 마스터 클라이언트에게 추측 전송
+            //photonView.RPC("OnSubmitGuess", RpcTarget.All);
+            //photonView.RPC("SetSubmitButtonInteractable", RpcTarget.All, false);
         }
     }
 
-    private bool IsValidGuess(string guess)
+    public bool IsValidGuess(string guess)
     {
         if (guess.Length != 4)
         {
@@ -88,13 +95,24 @@ public class UIManager : MonoBehaviour
         errorText.text = "";
     }
 
-
-    public void EnableInputField(bool enable)
+    public void EnableInputPanels(bool enable)
     {
-        guessInput.interactable = enable; // 입력 필드 활성화 또는 비활성화
-        if (!enable)
+        Team1_Input_GuessPanel.SetActive(enable && gameManager.IsTeam1Turn);
+        Team2_Input_GuessPanel.SetActive(enable && !gameManager.IsTeam1Turn);
+    }
+
+    public void EnableInputPanelsForTeam(bool enable, bool isTeam1)
+    {
+        if (isTeam1)
         {
-            guessInput.text = ""; // 비활성화 시 입력 필드를 비웁니다.
+            Team1_Input_GuessPanel.SetActive(enable && teamManager.Team1.Contains(PhotonNetwork.LocalPlayer));
+            Team2_Input_GuessPanel.SetActive(false);
+        }
+        else
+        {
+            Team1_Input_GuessPanel.SetActive(false);
+            Team2_Input_GuessPanel.SetActive(enable && teamManager.Team2.Contains(PhotonNetwork.LocalPlayer));
         }
     }
+
 }

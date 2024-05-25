@@ -59,6 +59,10 @@ MonoBehaviour:
   - StartTimer
   - SetSubmitButtonInteractable
   - OnSubmitGuess
+  - SetTeam1NumberSet
+  - SetTeam2NumberSet
+  - IsInputNumberPanelActiveRPC
+  - SetSecretNumber
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

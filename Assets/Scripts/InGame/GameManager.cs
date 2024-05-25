@@ -4,112 +4,46 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
 using System.Collections;
+using System.Runtime.InteropServices.ComTypes;
 
-public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
+public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
 {
     public Text GameLog;
     private string secretNumber; // 비밀 번호를 저장하는 변수
+    private string secretNumber2; // 비밀 번호를 저장하는 변수
     private List<string> guesses = new List<string>(); // 플레이어의 추측을 저장하는 리스트
+
+    //public Button submitGuessButton;
 
     public PlayerManager playerManager; // playerManager를 연결
     public TeamManager teamManager; //TeamManager를 연결
     public ChatManager chatManager; //ChatManager를 연결
+    public UIManager UIManager;
 
     private bool isGameStarting = false;
     public Text countdownText; //카운트다운 텍스트
     public Button readyButton; //게임 시작준비 버튼
 
-    /*타이머 및 시간 관련 함수*/
-    public Slider progressBar; // 프로그래스 바
-    public Button submitGuessButton; // 정답 제출 버튼
-    public Button startGameButton; // 게임 시작 버튼
-    public Text timerText; // 남은 시간 텍스트 표시
-                           // 
-    private float gameDuration = 10f; // 게임 시간(1분)
-    private float answerDuration = 10f; // 정답 입력 시간(10초)
-    private bool isAnswerTime = false;
-    private bool isTimerRunning = false;
-    private float elapsedTime = 0f;
-    private float currentDuration = 0f;
-    private float progress = 0f;
-    private string currentPhase = "게임 시간";
+    //숫자 턴제
+    // 판넬 1
+    // 입력필드 1
+    // 턴 bool 1
+    // 
+
+    public GameObject InputNumberPanel; //초기 숫자 입력판넬
+    public InputField inputNumberField;
+    public Button InputNumberBtn; //초기 숫자 입력버튼
+    public bool IsTeam1Turn { get; private set; } = true; // 팀 1의 턴 여부
+
+    private bool isTeam1NumberSet = false;
+    private bool isTeam2NumberSet = false;
+
 
     void Start()
     {
-        UIManager.Instance.EnableInputField(false); // 게임 시작 전에는 입력 필드를 비활성화
-        UpdateStartGameButtonVisibility(); //방장만 버튼이 보이도록 설정
-        startGameButton.onClick.AddListener(OnStartGame);
-        submitGuessButton.interactable = false;
-    }
-
-    private void Update()
-    {
-        if (isTimerRunning)
-        {
-            elapsedTime += Time.deltaTime;
-            if (elapsedTime >= currentDuration)
-            {
-                elapsedTime = currentDuration;
-                isTimerRunning = false;
-            }
-            UpdateUI();
-        }
-    }
-
-    void GenerateSecretNumber()
-    {
-        // 0-9 사이의 중복되지 않는 4자리 숫자를 생성
-        List<int> digits = new List<int>();
-        while (digits.Count < 4)
-        {
-            int randomDigit = Random.Range(0, 10);
-            if (!digits.Contains(randomDigit))
-            {
-                digits.Add(randomDigit);
-            }
-        }
-        secretNumber = string.Join("", digits); // 리스트를 문자열로 변환하여 비밀 번호 설정
-        Debug.Log(secretNumber);
-    }
-
-    public string CheckGuess(string guess)
-    {
-        int strikes = 0; // 스트라이크 수
-        int balls = 0; // 볼 수
-
-        for (int i = 0; i < guess.Length; i++)
-        {
-            if (guess[i] == secretNumber[i]) // 같은 위치에 같은 숫자가 있는 경우
-            {
-                strikes++;
-            }
-            else if (secretNumber.Contains(guess[i].ToString())) // 다른 위치에 같은 숫자가 있는 경우
-            {
-                balls++;
-            }
-        }
-
-        guesses.Add(guess); // 추측을 리스트에 추가
-        return $"{strikes}S {balls}B"; // 결과 반환
-    }
-
-    [PunRPC]
-    public void SubmitGuess(string guess, PhotonMessageInfo info)
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            string result = CheckGuess(guess); // 추측을 확인하여 결과 얻기
-            photonView.RPC("ReceiveResult", RpcTarget.All, info.Sender.NickName, guess, result); // 모든 클라이언트에게 결과 전송
-        }
-    }
-
-    [PunRPC]
-    void ReceiveResult(string senderName, string guess, string result)
-    {
-        // 결과를 UI에 표시하는 로직 (임시로 디버그 로그 사용)
-        Debug.Log($"{senderName} guessed {guess}, Result: {result}");
-        // UI 매니저의 DisplayResult 메서드를 호출하여 결과를 표시
-        UIManager.Instance.DisplayResult($"{guess}: {result}");
+        UIManager.Instance.EnableInputPanels(false); // 게임 시작 전에는 입력 판넬을 비활성화
+        InputNumberPanel.SetActive(false); // 게임 시작 전에는 숫자 입력 판넬을 비활성화
+        UpdateStartGameButtonVisibility(); // 방장만 버튼이 보이도록 설정
     }
 
     
@@ -130,7 +64,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         // 각 팀의 플레이어 수가 동일하고 모든 플레이어가 준비된 경우에만 게임 시작
         if (teamManager.Team1.Count == teamManager.Team2.Count && !isGameStarting)
         {
-            photonView.RPC("StartGameCountdownRPC", RpcTarget.All);
+            photonView.RPC("IsInputNumberPanelActiveRPC", RpcTarget.All);
         }
         else
         {
@@ -139,6 +73,94 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
+    private void ShowUnbalancedTeamsMessageRPC()
+    {
+        StartCoroutine(ShowUnbalancedTeamsMessage());
+    }
+
+    private IEnumerator ShowUnbalancedTeamsMessage() //인원수가 안맞을경우
+    {
+        countdownText.text = "인원수가 맞지 않습니다";
+        yield return new WaitForSeconds(1);
+        countdownText.text = "";
+    }
+
+    [PunRPC]
+    public void IsInputNumberPanelActiveRPC()
+    {
+        // 모든 플레이어에게 판넬을 숨김
+        InputNumberPanel.SetActive(false);
+
+        // 팀 1과 팀 2의 첫 번째 플레이어에게 판넬을 보이도록 설정
+        if (PhotonNetwork.LocalPlayer == teamManager.Team1[0] || PhotonNetwork.LocalPlayer == teamManager.Team2[0])
+        {
+            InputNumberPanel.SetActive(true);
+        }
+    }
+
+    public void InputNumber()
+    {
+        if (UIManager.Instance.IsValidGuess(inputNumberField.text)) // 입력받아온 값이 올바른 경우
+        {
+            if (PhotonNetwork.LocalPlayer == teamManager.Team1[0]) // 팀 1의 첫 번째 플레이어일 경우
+            {
+                secretNumber = inputNumberField.text; // 비밀 숫자 설정
+                isTeam1NumberSet = true; // 팀 1 비밀 숫자 설정 완료
+                Debug.Log("Team 1 설정 숫자: " + secretNumber); // 디버깅 로그 추가
+                photonView.RPC("SetSecretNumber", RpcTarget.All, secretNumber, 1);
+            }
+            if (PhotonNetwork.LocalPlayer == teamManager.Team2[0]) // 팀 2의 첫 번째 플레이어일 경우
+            {
+                secretNumber2 = inputNumberField.text; // 비밀 숫자 설정
+                isTeam2NumberSet = true; // 팀 2 비밀 숫자 설정 완료
+                Debug.Log("Team 2 설정 숫자: " + secretNumber2); // 디버깅 로그 추가
+                photonView.RPC("SetSecretNumber", RpcTarget.All, secretNumber2, 2);
+            }
+            InputNumberPanel.SetActive(false); // 입력 판넬 비활성화
+        }
+    }
+
+    [PunRPC]
+    private void SetSecretNumber(string number, int team)
+    {
+        if (team == 1)
+        {
+            secretNumber = number;
+            Debug.Log("Team 1 비밀 숫자 설정 완료: " + secretNumber);
+            isTeam1NumberSet = true;
+            photonView.RPC("SetTeam1NumberSet", RpcTarget.MasterClient);
+        }
+        else if (team == 2)
+        {
+            secretNumber2 = number;
+            Debug.Log("Team 2 비밀 숫자 설정 완료: " + secretNumber2);
+            isTeam2NumberSet = true;
+            photonView.RPC("SetTeam2NumberSet", RpcTarget.MasterClient);
+        }
+    }
+
+    [PunRPC]
+    private void SetTeam1NumberSet()
+    {
+        isTeam1NumberSet = true;
+        StartCountdownIfReady();
+    }
+
+    [PunRPC]
+    private void SetTeam2NumberSet()
+    {
+        isTeam2NumberSet = true;
+        StartCountdownIfReady();
+    }
+
+    private void StartCountdownIfReady()
+    {
+        if (isTeam1NumberSet && isTeam2NumberSet)
+        {
+            photonView.RPC("StartGameCountdownRPC", RpcTarget.All);
+        }
+    }
+    [PunRPC]
     private void StartGameCountdownRPC()
     {
         StartCoroutine(StartGameCountdown());
@@ -146,8 +168,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 
     private IEnumerator StartGameCountdown()
     {
-        isGameStarting = true;
-        UpdateStartGameButtonVisibility();
         for (int i = 3; i > 0; i--)
         {
             countdownText.text = i.ToString();
@@ -157,32 +177,20 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         yield return new WaitForSeconds(1);
         countdownText.text = "";
         photonView.RPC("GameStart", RpcTarget.All);
+
     }
 
     [PunRPC]
-    private void ShowUnbalancedTeamsMessageRPC()
+    public void GameStart() // 게임 시작
     {
-        StartCoroutine(ShowUnbalancedTeamsMessage());
-    }
+        Debug.Log($"Secret Number 1: {secretNumber}");
+        Debug.Log($"Secret Number 2: {secretNumber2}");
 
-    private IEnumerator ShowUnbalancedTeamsMessage()
-    {
-        countdownText.text = "인원수가 맞지 않습니다";
-        yield return new WaitForSeconds(1);
-        countdownText.text = "";
+        isGameStarting = true;
+        UIManager.Instance.EnableInputPanelsForTeam(true, IsTeam1Turn); // 게임 시작 시 팀 1의 입력 판넬을 활성화
     }
 
 
-
-    [PunRPC]
-    public void GameStart()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            GenerateSecretNumber();
-        }
-        UIManager.Instance.EnableInputField(true); // 게임 시작 시 입력 필드를 활성화합니다.
-    }
     // 방장만 버튼이 보이도록 설정
     public void UpdateStartGameButtonVisibility()
     {
@@ -192,124 +200,76 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     public void GameEnd()
     {
         isGameStarting = false;
-        UIManager.Instance.EnableInputField(false); // 게임 종료 시 입력 필드를 비활성화
+        UIManager.Instance.EnableInputPanels(false); // 게임 종료 시 입력 판넬을 비활성화
         UpdateStartGameButtonVisibility(); // 게임 종료 시 버튼 다시 보이기
     }
 
-    /* 타이머 
-     * + 
-     * 프로그래스바 게임 시간확인*/
-
-    private void UpdateUI()
+    void GenerateSecretNumber()
     {
-        progress = elapsedTime / currentDuration;
-        progressBar.value = progress;
-        int remainingTime = Mathf.CeilToInt(currentDuration - elapsedTime);
-        timerText.text = $"{currentPhase}: {remainingTime}초 남음";
+        // 0-9 사이의 중복되지 않는 4자리 숫자를 생성
+        List<int> digits = new List<int>();
+        while (digits.Count < 4)
+        {
+            int randomDigit = Random.Range(0, 10);
+            if (!digits.Contains(randomDigit))
+            {
+                digits.Add(randomDigit);
+            }
+        }
+        secretNumber = string.Join("", digits); // 리스트를 문자열로 변환하여 비밀 번호 설정
+        Debug.Log(secretNumber);
     }
 
-    private IEnumerator GameTimer()
+
+    public string CheckGuess(string guess, bool isTeam1)
     {
-        while (true)
+        string targetNumber = isTeam1 ? secretNumber2 : secretNumber; // targetNumber 초기화 수정
+        int strikes = 0; // 스트라이크 수
+        int balls = 0; // 볼 수
+
+        for (int i = 0; i < guess.Length; i++)
         {
-            yield return StartCoroutine(RunTimer(gameDuration, "게임 시간"));
-            isAnswerTime = true;
-            photonView.RPC("SetSubmitButtonInteractable", RpcTarget.All, true);
-            yield return StartCoroutine(RunTimer(answerDuration, "정답 입력 시간"));
-            isAnswerTime = false;
-
-        }
-    }
-
-    private IEnumerator RunTimer(float duration, string phase)
-    {
-        elapsedTime = 0f;
-        currentDuration = duration;
-        currentPhase = phase;
-        isTimerRunning = true;
-
-        while (isTimerRunning)
-        {
-            yield return null;
+            if (guess[i] == targetNumber[i]) // 같은 위치에 같은 숫자가 있는 경우
+            {
+                strikes++;
+            }
+            else if (targetNumber.Contains(guess[i].ToString())) // 다른 위치에 같은 숫자가 있는 경우
+            {
+                balls++;
+            }
         }
 
-        timerText.text = $"{phase} 종료";
-    }
-    [PunRPC]
-    private void OnSubmitGuess()
-    {
-        if (isAnswerTime)
-        {
-            photonView.RPC("ResetTimer", RpcTarget.All);
-        }
-    }
-
-    private void OnStartGame()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            photonView.RPC("StartTimer", RpcTarget.All);
-        }
+        guesses.Add(guess); // 추측을 리스트에 추가
+        return $"{strikes}S {balls}B"; // 결과 반환
     }
 
     [PunRPC]
-    private void StartTimer()
+    public void SubmitGuess(string guess, int playerActorNumber, PhotonMessageInfo info)
     {
-        if (!isTimerRunning)
-        {
-            isTimerRunning = true;
-            StartCoroutine(GameTimer());
-        }
+        bool isTeam1 = teamManager.Team1.Exists(player => player.ActorNumber == playerActorNumber);
+        string result = CheckGuess(guess, isTeam1); // 추측을 확인하여 결과 얻기
+        photonView.RPC("ReceiveResult", RpcTarget.All, info.Sender.NickName, guess, result, isTeam1); // 모든 클라이언트에게 결과 전송
     }
 
     [PunRPC]
-    private void ResetTimer()
+    void ReceiveResult(string senderName, string guess, string result, bool isTeam1)
     {
-        StopAllCoroutines();
-        isTimerRunning = false;
-        StartCoroutine(GameTimer());
-    }
+        // 결과를 UI에 표시하는 로직 (임시로 디버그 로그 사용)
+        Debug.Log($"{senderName} guessed {guess}, Result: {result}");
+        // UI 매니저의 DisplayResult 메서드를 호출하여 결과를 표시
+        UIManager.Instance.DisplayResult($"{guess}: {result}");
 
-    [PunRPC]
-    private void SetSubmitButtonInteractable(bool interactable)
-    {
-        submitGuessButton.interactable = interactable;
-    }
-
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
+        if (isTeam1)
         {
-            // 데이터 전송: 마스터 클라이언트가 타이머 정보를 전송
-            stream.SendNext(elapsedTime);
-            stream.SendNext(currentDuration);
-            stream.SendNext(currentPhase);
-            stream.SendNext(isTimerRunning);
-            stream.SendNext(submitGuessButton.interactable);
-            stream.SendNext(progress);
+            IsTeam1Turn = false; // 팀 2의 턴으로 변경
         }
         else
         {
-            try
-            {
-
-                // 데이터 수신: 클라이언트가 타이머 정보를 수신
-                elapsedTime = (float)stream.ReceiveNext();
-                currentDuration = (float)stream.ReceiveNext();
-                currentPhase = (string)stream.ReceiveNext();
-                isTimerRunning = (bool)stream.ReceiveNext();
-                progress = (float)stream.ReceiveNext();
-
-                bool isSubmitButtonInteractable = (bool)stream.ReceiveNext();
-
-                // 수신된 정보를 바탕으로 타이머 상태 업데이트
-                submitGuessButton.interactable = isSubmitButtonInteractable;
-                UpdateUI();
-
-            }
-            catch { }
-
+            IsTeam1Turn = true; // 팀 1의 턴으로 변경
         }
+
+        UIManager.Instance.EnableInputPanelsForTeam(true, IsTeam1Turn); // 다음 팀의 입력 판넬 활성화
     }
 
 }
+

@@ -20,6 +20,8 @@ public class TeamManager : MonoBehaviourPunCallbacks
     public GameObject playerUIPrefab;
     private Dictionary<Photon.Realtime.Player, GameObject> playerUIs = new Dictionary<Photon.Realtime.Player, GameObject>();
 
+    public UIManager UIManager;
+
     public void AssignTeam(Photon.Realtime.Player player)
     {
         if (Team1.Count <= Team2.Count)
@@ -121,5 +123,19 @@ public class TeamManager : MonoBehaviourPunCallbacks
             }
         }
         return null;
+    }
+
+    // 팀 패널을 활성화 또는 비활성화하는 메서드
+    public void EnableTeamPanels(bool enable)
+    {
+        team1Panel.gameObject.SetActive(enable);
+        team2Panel.gameObject.SetActive(enable);
+    }
+
+    // 특정 팀의 패널만 활성화하는 메서드
+    public void UpdateInputPanelVisibility(bool isTeam1Turn)
+    {
+        UIManager.Team1_Input_GuessPanel.SetActive(isTeam1Turn);
+        UIManager.Team2_Input_GuessPanel.SetActive(!isTeam1Turn);
     }
 }
