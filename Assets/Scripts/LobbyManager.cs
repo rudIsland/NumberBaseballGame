@@ -49,6 +49,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("로비에 접속하였습니다.");
+        cachedRoomList.Clear(); // 방 목록 캐시 초기화
         // 로비에 접속했을 때 초기 방 목록을 업데이트
         UpdateRoomList();
     }
