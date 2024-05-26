@@ -1546,8 +1546,8 @@ RectTransform:
   - {fileID: 1293769386}
   - {fileID: 112196802}
   - {fileID: 1030016338}
-  - {fileID: 1459773737}
   - {fileID: 1481087139}
+  - {fileID: 1459773737}
   m_Father: {fileID: 1279153658}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5021,7 +5021,7 @@ MonoBehaviour:
   InputNumberPanel: {fileID: 1459773736}
   inputNumberField: {fileID: 732036739}
   InputNumberBtn: {fileID: 156881806}
-  exText: {fileID: 1481087140}
+  ExText: {fileID: 1481087140}
 --- !u!4 &2063968968
 Transform:
   m_ObjectHideFlags: 0

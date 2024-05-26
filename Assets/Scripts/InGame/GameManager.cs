@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
     private bool isTeam1NumberSet = false;
     private bool isTeam2NumberSet = false;
 
+    public Text ExText;
 
     void Start()
     {
@@ -58,7 +59,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         // 각 팀의 플레이어 수가 동일하고 모든 플레이어가 준비된 경우에만 게임 시작
         if (teamManager.Team1.Count == teamManager.Team2.Count && !isGameStarting)
         {
-            photonView.RPC("IsInputNumberPanelActiveRPC", RpcTarget.All);
+            photonView.RPC("EXPrint", RpcTarget.All);
         }
         else
         {
@@ -90,6 +91,23 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         {
             InputNumberPanel.SetActive(true);
         }
+    }
+
+    [PunRPC]
+    public IEnumerator EXPrint()
+    {
+        ExText.text = "빨간 테두리는 턴을 의미합니다";
+        yield return new WaitForSeconds(2);
+
+        ExText.text = "각 팀의 1번만 숫자를 입력할 수 있으며";
+        yield return new WaitForSeconds(2);
+
+        ExText.text = "곧 각 팀의 숫자를 정합니다.";
+        yield return new WaitForSeconds(2);
+
+
+        ExText.text = "";
+        photonView.RPC("IsInputNumberPanelActiveRPC", RpcTarget.All);
     }
 
     public void InputNumber()
@@ -129,7 +147,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
             secretNumber2 = number;
             Debug.Log("Team 2 비밀 숫자 설정 완료: " + secretNumber2);
             isTeam2NumberSet = true;
-            photonView.RPC("GameStart", RpcTarget.MasterClient);
+            photonView.RPC("SetTeam2NumberSet", RpcTarget.MasterClient);
         }
     }
 
@@ -250,19 +268,25 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
         if (isTeam1)
         {
-            countdownText.text = "Team1 Win";
+            photonView.RPC("SetCountdownText", RpcTarget.All, "Team1 Win");
             photonView.RPC("SetWinningTeamPanelBorder", RpcTarget.All, 1);
         }
         else
         {
-            countdownText.text = "Team2 Win";
+            photonView.RPC("SetCountdownText", RpcTarget.All, "Team2 Win");
             photonView.RPC("SetWinningTeamPanelBorder", RpcTarget.All, 2);
         }
         yield return new WaitForSeconds(2);
-        countdownText.text = "";
+        photonView.RPC("SetCountdownText", RpcTarget.All, "");
 
         UIphotonView.RPC("ResetWinningTeamPanel", RpcTarget.All);
         photonView.RPC("GameEnd", RpcTarget.All); // 모든 클라이언트에서 ResetGame 호출
+    }
+
+    [PunRPC]
+    public void SetCountdownText(string text)
+    {
+        countdownText.text = text;
     }
 
 
