@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
     void ReceiveResult(string senderName, string guess, string result, bool isTeam1)
     {
         Debug.Log($"{senderName} guessed {guess}, Result: {result}");
-        UIManager.Instance.DisplayResult($"{guess}: {result}");
+        UIManager.Instance.DisplayResult($"{senderName}/{guess}: {result}");
         PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
 
         if (result != "win")
