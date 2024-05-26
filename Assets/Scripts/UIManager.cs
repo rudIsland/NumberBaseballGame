@@ -14,6 +14,12 @@ public class UIManager : MonoBehaviourPunCallbacks
     public GameObject Team2_Input_GuessPanel; // 팀 2 입력 판넬
 
 
+    public GameObject Team1TurnPanel; //팀1턴일때 표시할 판넬
+    public GameObject Team2TurnPanel; //팀2턴일때 표시할 판넬
+    private Image team1Image;
+    private Image team2Image;
+
+
     public Text resultText; // 결과를 표시하는 텍스트
     public GameManager gameManager; // 게임 매니저 참조
     public TeamManager teamManager;
@@ -34,7 +40,12 @@ public class UIManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        team1Image = Team1TurnPanel.GetComponent<Image>(); // 투명도를 위해 가져옴
+        team2Image = Team2TurnPanel.GetComponent<Image>(); // 투명도를 위해 가져옴
+
         EnableInputPanels(false); // 게임 시작 전에는 입력 필드를 비활성화합니다.
+        // 패널의 Image 컴포넌트 가져오기
+        UIReset();
     }
 
     [PunRPC]
@@ -46,8 +57,6 @@ public class UIManager : MonoBehaviourPunCallbacks
             //우리팀한테만 보내게 수정해야함.
             PhotonView photonView = gameManager.GetComponent<PhotonView>();
             photonView.RPC("SubmitGuess", RpcTarget.MasterClient, guess, PhotonNetwork.LocalPlayer.ActorNumber); // 마스터 클라이언트에게 추측 전송
-            //photonView.RPC("OnSubmitGuess", RpcTarget.All);
-            //photonView.RPC("SetSubmitButtonInteractable", RpcTarget.All, false);
         }
     }
 
@@ -98,7 +107,6 @@ public class UIManager : MonoBehaviourPunCallbacks
         errorText.text = "";
     }
 
-  
     public void EnableInputPanels(bool enable)
     {
         Team1_Input_GuessPanel.SetActive(enable && gameManager.IsTeam1Turn);
@@ -106,7 +114,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void HideInputPanels()
+    public void UIReset()
     {
         Team1_Input_GuessPanel.SetActive(false);
         Team2_Input_GuessPanel.SetActive(false);
@@ -114,6 +122,10 @@ public class UIManager : MonoBehaviourPunCallbacks
         Team2_guessInput.text = "";
         resultText.text = "";
         errorText.text = "";
+        SetPanelTransparency(team1Image, 0f);
+        SetPanelTransparency(team2Image, 0f);
+        SetPanelBorderColor(team1Image, Color.red);
+        SetPanelBorderColor(team2Image, Color.red);
     }
 
     public void EnableInputPanelsForTeam(bool enable, bool isTeam1)
@@ -130,4 +142,76 @@ public class UIManager : MonoBehaviourPunCallbacks
         }
     }
 
+
+    [PunRPC]
+    public void DisplayTurnUI(bool isTeam1)
+    {
+        Debug.Log($"DisplayTurnUI 호출됨: isTeam1 = {isTeam1}"); // 디버그 로그 추가
+        if (isTeam1)
+        {
+            SetPanelTransparency(team1Image, 1f);
+            Debug.Log("Team1TurnPanel 투명도를 1f로 설정");
+            SetPanelTransparency(team2Image, 0f);
+            Debug.Log("Team2TurnPanel 투명도를 0f로 설정");
+        }
+        else
+        {
+            SetPanelTransparency(team1Image, 0f);
+            Debug.Log("Team1TurnPanel 투명도를 0f로 설정");
+            SetPanelTransparency(team2Image, 1f);
+            Debug.Log("Team2TurnPanel 투명도를 1f로 설정");
+        }
+    }
+
+    public void SetPanelTransparency(Image image, float alpha)
+    {
+        if (image != null)
+        {
+            Color color = image.color;
+            color.a = alpha;
+            image.color = color;
+            Debug.Log($"{image.gameObject.name}의 투명도를 {alpha}로 설정"); // 디버그 로그 추가
+        }
+    }
+    public void SetPanelBorderColor(Image image, Color borderColor)
+    {
+        if (image != null)
+        {
+            image.color = borderColor;
+        }
+    }
+
+
+
+    [PunRPC]
+    public void SetWinningTeamUI(int winningTeam)
+    {
+        SetPanelTransparency(team1Image, 1f);
+        SetPanelTransparency(team2Image, 1f);
+
+        if (winningTeam == 1)
+        {
+            SetPanelBorderColor(team2Image, Color.black);
+            SetPanelBorderColor(team1Image, Color.green);
+            Debug.Log("Team1TurnPanel을 green으로 설정하고 Team2TurnPanel을 black으로 설정");
+        }
+        else
+        {
+            SetPanelBorderColor(team1Image, Color.black);
+            SetPanelBorderColor(team2Image, Color.green);
+            Debug.Log("Team2TurnPanel을 green으로 설정하고 Team1TurnPanel을 black으로 설정");
+        }
+    }
+
+    [PunRPC]
+    public void ResetWinningTeamPanel()
+    {
+        SetPanelTransparency(team1Image, 1f);
+        SetPanelTransparency(team2Image, 1f);
+
+        SetPanelBorderColor(team1Image, Color.red);
+        SetPanelBorderColor(team2Image, Color.red);
+
+        Debug.Log("모든 패널의 투명도를 1f로 설정하고 색상을 red로 설정");
+    }
 }

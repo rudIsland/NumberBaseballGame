@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
     private string secretNumber2; // 비밀 번호를 저장하는 변수
     private List<string> guesses = new List<string>(); // 플레이어의 추측을 저장하는 리스트
 
-    //public Button submitGuessButton;
+
 
     public PlayerManager playerManager; // playerManager를 연결
     public TeamManager teamManager; //TeamManager를 연결
@@ -25,11 +25,6 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
     public Text countdownText; //카운트다운 텍스트
     public Button readyButton; //게임 시작준비 버튼
 
-    //숫자 턴제
-    // 판넬 1
-    // 입력필드 1
-    // 턴 bool 1
-    // 
 
     public GameObject InputNumberPanel; //초기 숫자 입력판넬
     public InputField inputNumberField;
@@ -43,9 +38,6 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
     void Start()
     {
         ResetGame(); // 게임 시작 전 초기 상태로 설정
-        UIManager.Instance.EnableInputPanels(false); // 게임 시작 전에는 입력 판넬을 비활성화
-        InputNumberPanel.SetActive(false); // 게임 시작 전에는 숫자 입력 판넬을 비활성화
-        UpdateStartGameButtonVisibility(); // 방장만 버튼이 보이도록 설정
     }
 
     
@@ -137,7 +129,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
             secretNumber2 = number;
             Debug.Log("Team 2 비밀 숫자 설정 완료: " + secretNumber2);
             isTeam2NumberSet = true;
-            photonView.RPC("SetTeam2NumberSet", RpcTarget.MasterClient);
+            photonView.RPC("GameStart", RpcTarget.MasterClient);
         }
     }
 
@@ -162,6 +154,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
             photonView.RPC("StartGameCountdownRPC", RpcTarget.All);
         }
     }
+
     [PunRPC]
     private void StartGameCountdownRPC()
     {
@@ -190,6 +183,10 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         readyButton.gameObject.SetActive(false); // 게임 시작 시 readyButton 비활성화
         isGameStarting = true;
         UIManager.Instance.EnableInputPanelsForTeam(true, IsTeam1Turn); // 게임 시작 시 팀 1의 입력 판넬을 활성화
+
+        // 게임 시작 시 모든 클라이언트에 팀 1의 턴임을 표시
+        PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
+        UIphotonView.RPC("DisplayTurnUI", RpcTarget.All, true); // 팀 1의 턴으로 설정
     }
 
 
@@ -204,24 +201,20 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
     {
         isGameStarting = false; // 게임 시작 상태를 false로 설정
         photonView.RPC("ResetGameRPC", RpcTarget.All); // 모든 클라이언트에서 ResetGame 호출
-        UpdateStartGameButtonVisibility(); // 게임 종료 시 버튼 다시 보이기
-        IsTeam1Turn = true; // 다시 팀 1부터 시작하도록 true
     }
 
-    void GenerateSecretNumber()
+
+    [PunRPC]
+    public void SubmitGuess(string guess, int playerActorNumber, PhotonMessageInfo info)
     {
-        // 0-9 사이의 중복되지 않는 4자리 숫자를 생성
-        List<int> digits = new List<int>();
-        while (digits.Count < 4)
+        bool isTeam1 = teamManager.Team1.Exists(player => player.ActorNumber == playerActorNumber);
+        string result = CheckGuess(guess, isTeam1); // 추측을 확인하여 결과 얻기
+        photonView.RPC("ReceiveResult", RpcTarget.All, info.Sender.NickName, guess, result, isTeam1); // 모든 클라이언트에게 결과 전송
+
+        if (result == "win")
         {
-            int randomDigit = Random.Range(0, 10);
-            if (!digits.Contains(randomDigit))
-            {
-                digits.Add(randomDigit);
-            }
+            StartCoroutine(IsWin(isTeam1));
         }
-        secretNumber = string.Join("", digits); // 리스트를 문자열로 변환하여 비밀 번호 설정
-        Debug.Log(secretNumber);
     }
 
     [PunRPC]
@@ -244,58 +237,65 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         }
 
         guesses.Add(guess); // 추측을 리스트에 추가
-        if(strikes == 4)
+        if (strikes == 4)
         {
-            photonView.RPC("IsWin", RpcTarget.All, isTeam1); // 모든 클라이언트에게 결과 전송
-            return "";
+            return "win";
         }
         return $"{strikes}S {balls}B"; // 결과 반환
     }
 
     [PunRPC]
-    public void SubmitGuess(string guess, int playerActorNumber, PhotonMessageInfo info)
+    public IEnumerator IsWin(bool isTeam1)
     {
-        bool isTeam1 = teamManager.Team1.Exists(player => player.ActorNumber == playerActorNumber);
-        string result = CheckGuess(guess, isTeam1); // 추측을 확인하여 결과 얻기
-        photonView.RPC("ReceiveResult", RpcTarget.All, info.Sender.NickName, guess, result, isTeam1); // 모든 클라이언트에게 결과 전송
-
-    }
-
-    [PunRPC]
-    public IEnumerator IsWin(bool isTeam1){
+        PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
         if (isTeam1)
         {
             countdownText.text = "Team1 Win";
-            yield return new WaitForSeconds(1);
-            countdownText.text = "";
+            photonView.RPC("SetWinningTeamPanelBorder", RpcTarget.All, 1);
         }
         else
         {
             countdownText.text = "Team2 Win";
-            yield return new WaitForSeconds(1);
-            countdownText.text = "";
+            photonView.RPC("SetWinningTeamPanelBorder", RpcTarget.All, 2);
         }
+        yield return new WaitForSeconds(2);
+        countdownText.text = "";
+
+        UIphotonView.RPC("ResetWinningTeamPanel", RpcTarget.All);
         photonView.RPC("GameEnd", RpcTarget.All); // 모든 클라이언트에서 ResetGame 호출
     }
+
+
+    [PunRPC]
+    public void SetWinningTeamPanelBorder(int winningTeam)
+    {
+        UIManager.Instance.SetWinningTeamUI(winningTeam);
+    }
+
 
     [PunRPC]
     void ReceiveResult(string senderName, string guess, string result, bool isTeam1)
     {
-        // 결과를 UI에 표시하는 로직 (임시로 디버그 로그 사용)
         Debug.Log($"{senderName} guessed {guess}, Result: {result}");
-        // UI 매니저의 DisplayResult 메서드를 호출하여 결과를 표시
         UIManager.Instance.DisplayResult($"{guess}: {result}");
+        PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
 
-        if (isTeam1)
+        if (result != "win")
         {
-            IsTeam1Turn = false; // 팀 2의 턴으로 변경
+            if (isTeam1)
+            {
+                IsTeam1Turn = false;
+                Debug.Log("Switching to Team 2's turn");
+            }
+            else
+            {
+                IsTeam1Turn = true;
+                Debug.Log("Switching to Team 1's turn");
+            }
+
+            UIphotonView.RPC("DisplayTurnUI", RpcTarget.All, IsTeam1Turn);
+            UIManager.Instance.EnableInputPanelsForTeam(true, IsTeam1Turn);
         }
-        else
-        {
-            IsTeam1Turn = true; // 팀 1의 턴으로 변경
-        }
-        if(result !="")
-            UIManager.Instance.EnableInputPanelsForTeam(true, IsTeam1Turn); // 다음 팀의 입력 판넬 활성화
         else
         {
             UIManager.Instance.DisplayResult($"{4}S: {0}B");
@@ -317,14 +317,14 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         isTeam1NumberSet = false;
         isTeam2NumberSet = false;
         IsTeam1Turn = true;
-        UIManager.Instance.EnableInputPanels(false);
-        InputNumberPanel.SetActive(false);
+        UIManager.Instance.EnableInputPanels(false);// 게임 시작 전에는 입력 판넬을 비활성화
+        InputNumberPanel.SetActive(false); //게임 시작 전에는 숫자 입력 판넬을 비활성화
         countdownText.text = "";
         readyButton.gameObject.SetActive(PhotonNetwork.IsMasterClient);
-        UIManager.Instance.HideInputPanels();
-        UpdateStartGameButtonVisibility();
-        PhotonView photonView = UIManager.GetComponent<PhotonView>();
-        photonView.RPC("HideInputPanels", RpcTarget.All); // 모든 클라이언트에서 입력 패널을 비활성화
+ 
+        UpdateStartGameButtonVisibility();// 방장만 버튼이 보이도록 설정
+        PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
+        UIphotonView.RPC("UIReset", RpcTarget.All); // 모든 클라이언트에서 입력 패널을 비활성화
     }
 }
 
