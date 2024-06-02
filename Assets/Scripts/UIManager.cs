@@ -25,6 +25,18 @@ public class UIManager : MonoBehaviourPunCallbacks
     public TeamManager teamManager;
     public Text errorText; // ErrorText UI 요소
 
+    private List<string> team1Guess = new List<string>(); // 팀 1 추측 리스트
+    private List<string> team2Guess = new List<string>(); // 팀 2 추측 리스트
+
+    public GameObject Team1GuessPanel; //팀1 정답리스트 판넬
+    public GameObject Team2GuessPanel; //팀2 정답리스트 판넬
+
+    public Transform  Team1ContentPanel; // Team1 스크롤뷰의 Content Panel
+    public Transform  Team2ContentPanel; // Team2 스크롤뷰의 Content Panel
+
+    public GameObject Team1GuessePrefab; // 채팅 메시지 프리팹
+    public GameObject Team2GuessePrefab; // 채팅 메시지 프리팹
+
     void Awake()
     {
         // UIManager 인스턴스 설정
@@ -40,6 +52,8 @@ public class UIManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        Team1GuessPanel.SetActive(false); 
+        Team2GuessPanel.SetActive(false);
         team1Image = Team1TurnPanel.GetComponent<Image>(); // 투명도를 위해 가져옴
         team2Image = Team2TurnPanel.GetComponent<Image>(); // 투명도를 위해 가져옴
 
@@ -107,6 +121,63 @@ public class UIManager : MonoBehaviourPunCallbacks
         errorText.text = "";
     }
 
+    public void Inputguess(string message, bool isTeam)
+    {
+        if (isTeam)
+        {
+            team1Guess.Add(message);
+            UpdateTeam1Display(team1Guess);
+        }
+        else
+        {
+            team2Guess.Add(message);
+            UpdateTeam2Display(team2Guess);
+        }   
+    }
+
+    private void UpdateTeam1Display(List<string> messagesToDisplay)
+    {
+        // 기존 메시지 모두 제거
+        foreach (Transform child in Team1ContentPanel)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach (string message in messagesToDisplay)
+        {
+            GameObject newMessage = Instantiate(Team1GuessePrefab, Team1ContentPanel);
+            Text messageText = newMessage.GetComponent<Text>();
+            if (messageText != null)
+            {
+                messageText.text = message;
+            }
+        }
+
+        Canvas.ForceUpdateCanvases(); // 캔버스 강제 업데이트
+    }
+
+    private void UpdateTeam2Display(List<string> messagesToDisplay)
+    {
+        // 기존 메시지 모두 제거
+        foreach (Transform child in Team2ContentPanel)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach (string message in messagesToDisplay)
+        {
+            GameObject newMessage = Instantiate(Team2GuessePrefab, Team2ContentPanel);
+            Text messageText = newMessage.GetComponent<Text>();
+            if (messageText != null)
+            {
+                messageText.text = message;
+            }
+        }
+
+        Canvas.ForceUpdateCanvases(); // 캔버스 강제 업데이트
+    }
+
+
     public void EnableInputPanels(bool enable)
     {
         Team1_Input_GuessPanel.SetActive(enable && gameManager.IsTeam1Turn);
@@ -126,6 +197,8 @@ public class UIManager : MonoBehaviourPunCallbacks
         SetPanelTransparency(team2Image, 0f);
         SetPanelBorderColor(team1Image, Color.red);
         SetPanelBorderColor(team2Image, Color.red);
+        team1Guess.Clear();
+        team2Guess.Clear();
     }
 
     public void EnableInputPanelsForTeam(bool enable, bool isTeam1)
@@ -213,5 +286,22 @@ public class UIManager : MonoBehaviourPunCallbacks
         SetPanelBorderColor(team2Image, Color.red);
 
         Debug.Log("모든 패널의 투명도를 1f로 설정하고 색상을 red로 설정");
+    }
+
+    public void Team1GuessListExit()
+    {
+        Team1GuessPanel.SetActive(false);
+    }
+    public void Team2GuessListExit()
+    {
+        Team2GuessPanel.SetActive(false);
+    }
+    public void Team1GuessListOpen()
+    {
+        Team1GuessPanel.SetActive(true); 
+    }
+    public void Team2GuessListOpen()
+    {
+        Team2GuessPanel.SetActive(true);
     }
 }

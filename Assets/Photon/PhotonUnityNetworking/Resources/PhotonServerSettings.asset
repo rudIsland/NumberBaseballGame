@@ -79,6 +79,9 @@ MonoBehaviour:
   - SetWinningTeamPanel
   - EXPrint
   - SetCountdownText
+  - InputTeam1guess
+  - InputTeam2guess
+  - Inputguess
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

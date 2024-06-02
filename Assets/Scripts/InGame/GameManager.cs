@@ -303,13 +303,13 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         Debug.Log($"{senderName} guessed {guess}, Result: {result}");
         UIManager.Instance.DisplayResult($"{senderName}/{guess}: {result}");
         PhotonView UIphotonView = UIManager.GetComponent<PhotonView>();
-
+        UIManager.Instance.Inputguess($"{senderName}/{guess}: {result}",isTeam1);
         if (result != "win")
         {
             if (isTeam1)
             {
                 IsTeam1Turn = false;
-                Debug.Log("Switching to Team 2's turn");
+                Debug.Log("Switching to Team 2's turn");                
             }
             else
             {
@@ -322,7 +322,7 @@ public class GameManager : MonoBehaviourPunCallbacks//, IPunObservable
         }
         else
         {
-            UIManager.Instance.DisplayResult($"{4}S: {0}B");
+            UIManager.Instance.DisplayResult($"{guess}: {4}S: {0}B");
         }
     }
 
