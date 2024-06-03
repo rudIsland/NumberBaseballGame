@@ -173,4 +173,22 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             EnterRoomPanel.SetActive(true);
         }
     }
+
+    public void PullRoomList()
+    {
+        RoomPuller roomPoller = gameObject.AddComponent<RoomPuller>();
+        roomPoller.OnGetRoomsInfo
+        (
+            (roomInfos) =>
+            {
+                // 룸리스트를 받고나서 작업 코드 넣기
+                //Debug.Log($"현재 방 갯수 : {roomInfos.Count }");
+                OnRoomListUpdate(roomInfos);
+                //Debug.Log($"현재 cachedRoomList 갯수 : {cachedRoomList.Count }");
+                // 마지막엔 오브젝트 제거해주기
+                Destroy(roomPoller);
+            }
+        );
+
+    }
 }
