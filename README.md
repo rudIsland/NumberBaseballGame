@@ -14,6 +14,6 @@ Photon에서 제공하는 유니티 에셋 라이브러리를 활용하여 유�
 <br/>
 
 **팀원**<br/>
-[김지학]:https://github.com/SuCreamCake
+[SuCreamCake]:https://github.com/SuCreamCake
 <br/>
-[하동우]:https://github.com/Oct-rabbit
+[Oct-rabbit]:https://github.com/Oct-rabbit
