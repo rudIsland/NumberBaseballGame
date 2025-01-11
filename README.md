@@ -10,8 +10,8 @@ Photon에서 제공하는 유니티 에셋 라이브러리를 활용하여 유�
 
 ### 소속 인원
 **팀장**  
-[김경훈](https://github.com/rudIsland)  
+김경훈: [rudIsland](https://github.com/rudIsland)  
 
 **팀원**  
-[SuCreamCake](https://github.com/SuCreamCake)  
-[Oct-rabbit](https://github.com/Oct-rabbit)
+김지학: [SuCreamCake](https://github.com/SuCreamCake)  
+하동우: [Oct-rabbit](https://github.com/Oct-rabbit)
