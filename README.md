@@ -10,10 +10,11 @@ Photon에서 제공하는 유니티 에셋 라이브러리를 활용하여 유�
 
 ### 소속 인원
 **팀장**<br/>
-김경훈 [LEI-2812]
+김경훈 https://github.com/rudIsland
 <br/>
 
 **팀원**<br/>
-하동우 [Oct-rabbit]
+김지학 https://github.com/SuCreamCake
+하동우 https://github.com/Oct-rabbit
 <br/>
-김지학
+하동우 https://github.com/Oct-rabbit
